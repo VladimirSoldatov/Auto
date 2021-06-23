@@ -612,7 +612,7 @@ namespace WindowsFormsApp1
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Name = "Auto";
-            this.Text = "Form1";
+            this.Text = "LegoCar_XML_reader";
             ((System.ComponentModel.ISupportInitialize)(this.EquipmentText)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
