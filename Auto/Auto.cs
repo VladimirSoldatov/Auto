@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -261,7 +262,7 @@ namespace WindowsFormsApp1
                                 string[] text_mail1;
                                 EquipmentText.Rows.Clear();
  
-                                foreach (var item in this.Controls.Find("Description", true))
+                                foreach (var item in this.Controls.Find("EquipmentText", true))
                                 {
 
                                     DataGridViewTextBoxColumn dgvAge = new DataGridViewTextBoxColumn();
@@ -429,9 +430,13 @@ namespace WindowsFormsApp1
 
         private string[] getArray(string myUrl)
         {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
             List<string> my_list = new List<string>();
             using (HttpClient client_json = new HttpClient())
             {
+
                 client_json.BaseAddress = new Uri(myUrl);
                 Task<string> task_json = client_json.GetStringAsync(client_json.BaseAddress);
                 string text_json = task_json.Result;
