@@ -118,7 +118,11 @@ namespace WindowsFormsApp1
                 foreach (XmlNode childnode in xnode.ChildNodes)
                 {
                     myCars.Add(childnode);
-                    listBox1.Items.Add(childnode.ChildNodes[11].InnerText);
+                    foreach (System.Xml.XmlElement childnodes in childnode.ChildNodes)
+                    {
+                        if (childnodes.Name=="Model")
+                        listBox1.Items.Add(childnodes.InnerText);
+                    }
                 }
             }
             EquipmentText.Columns.Add("Опции", "");
