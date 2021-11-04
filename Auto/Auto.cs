@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -19,7 +20,7 @@ namespace WindowsFormsApp1
         public static class Resolver
         {
             private static volatile bool _loaded;
-
+      
             public static void RegisterDependencyResolver()
             {
                 if (!_loaded)
@@ -107,8 +108,34 @@ namespace WindowsFormsApp1
             client.BaseAddress = new Uri("https://sales.mercedes-cardinal.ru/index.php?route=feed/ecf_used");
             Task<string> task = client.GetStringAsync(client.BaseAddress);
             string text = task.Result;
-            XmlDocument document = new XmlDocument();
+            string line = String.Empty;
+            List<string> menu = new List<string>();
+            using (StreamReader sr = new StreamReader(@"\\192.168.106.13\c$\LogicStarAvtoAppServer\Logs\LegoCar\trace.log"))
+            {
+                string protoline = string.Empty;
+                while (sr.EndOfStream != true)
+                {
+                    protoline = sr.ReadLine();
+                    if (protoline.Contains("json"))
+                    {
+                        menu.Add(sr.ReadLine());
+                    }
+                }
+            }
+            
+                //JObject jObject = JObject.Parse(line);
+                JArray jArray = JArray.Parse(menu[menu.Count-2]);
+            foreach(var items in jArray)
+            {
+                var item_dict = items.ToObject<Dictionary<string, string>>();
+                foreach (var key in item_dict)
+                {
+                    dataGridView1.Rows.Add(key.Key, key.Value);
+                }
+            }
+                XmlDocument document = new XmlDocument();
             document.LoadXml(text);
+            document.Save("car_loaded.xml");
             XmlElement xRoot = document.DocumentElement;
 
             List<XmlNode> myCars = new List<XmlNode>();
