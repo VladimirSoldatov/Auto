@@ -110,30 +110,53 @@ namespace WindowsFormsApp1
             string text = task.Result;
             string line = String.Empty;
             List<string> menu = new List<string>();
-            using (StreamReader sr = new StreamReader(@"\\192.168.106.13\c$\LogicStarAvtoAppServer\Logs\LegoCar\trace.log"))
+            string protoline = string.Empty;
+            string save_json = string.Empty;
+            try
             {
-                string protoline = string.Empty;
-                while (sr.EndOfStream != true)
+                using (StreamReader sr = new StreamReader(@"\\192.168.106.13\c$\LogicStarAvtoAppServer\Logs\LegoCar\trace.log"))
                 {
-                    protoline = sr.ReadLine();
-                    if (protoline.Contains("json"))
+               
+                    while (sr.EndOfStream != true)
                     {
-                        menu.Add(sr.ReadLine());
+                        protoline = sr.ReadLine();
+                        if (protoline.Contains("json"))
+                        {
+                            menu.Add(sr.ReadLine());
+                        }
+                        save_json += protoline + "\n";
+                    }
+                    
+                }
+                using (StreamWriter sr = new StreamWriter("save.json"))
+                {
+                    sr.Write(save_json);
+                   
+
+                }
+                //JObject jObject = JObject.Parse(line);
+                List<JArray> js = new List<JArray>();
+                foreach (var menu_item in menu)
+                {
+                    js.Add(JArray.Parse(menu_item));
+                }
+                foreach (var js_item in js)
+                {
+                    foreach (var items in js_item)
+                    {
+                        var item_dict = items.ToObject<Dictionary<string, string>>();
+                        foreach (var key in item_dict)
+                        {
+                            dataGridView1.Rows.Add(key.Key, key.Value);
+                        }
                     }
                 }
             }
-            
-                //JObject jObject = JObject.Parse(line);
-                JArray jArray = JArray.Parse(menu[menu.Count-2]);
-            foreach(var items in jArray)
+            catch (Exception ex)
             {
-                var item_dict = items.ToObject<Dictionary<string, string>>();
-                foreach (var key in item_dict)
-                {
-                    dataGridView1.Rows.Add(key.Key, key.Value);
-                }
+                MessageBox.Show(ex.Message);
             }
-                XmlDocument document = new XmlDocument();
+                            XmlDocument document = new XmlDocument();
             document.LoadXml(text);
             document.Save("car_loaded.xml");
             XmlElement xRoot = document.DocumentElement;
