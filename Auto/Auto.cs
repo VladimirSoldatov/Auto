@@ -154,7 +154,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                label4.Text = ex.Message;
             }
                             XmlDocument document = new XmlDocument();
             document.LoadXml(text);
