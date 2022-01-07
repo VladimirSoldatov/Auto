@@ -120,11 +120,14 @@ namespace WindowsFormsApp1
                     while (sr.EndOfStream != true)
                     {
                         protoline = sr.ReadLine();
+                        if(label4.Text == "label4")
+                        label4.Text = "Дата выгрузки JSON: " + DateTime.Parse(protoline.Split(' ')[0]).ToString("dd.MM.yyyy");
                         if (protoline.Contains("json"))
                         {
                             menu.Add(sr.ReadLine());
                         }
-                        save_json += protoline + "\n";
+                        save_json += protoline + "\r\n";
+
                     }
                     
                 }
