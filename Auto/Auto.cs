@@ -482,6 +482,13 @@ namespace WindowsFormsApp1
                         }
                     }
                 }
+               foreach(DataGridViewRow item in dataGridView1.Rows)
+                {
+                    if (item.Cells[1].Value !=null && item.Cells[1].Value.ToString() == VIN1.Text)
+                    {
+                        dataGridView1.CurrentCell = item.Cells[0];
+                    }
+                }
             };
         }
 
