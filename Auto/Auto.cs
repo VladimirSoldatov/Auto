@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,10 +7,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
+using Formatting = Newtonsoft.Json.Formatting;
 
 namespace WindowsFormsApp1
 {
@@ -114,9 +118,12 @@ namespace WindowsFormsApp1
             string save_json = string.Empty;
             try
             {
+                string unicode = string.Empty;
                 using (StreamReader sr = new StreamReader(@"\\192.168.106.13\c$\LogicStarAvtoAppServer\Logs\LegoCar\trace.log"))
                 {
-               
+            
+                    //string ls = sr.ReadToEnd();
+                List<string> unicode_text = new List<string>();
                     while (sr.EndOfStream != true)
                     {
                         protoline = sr.ReadLine();
@@ -124,10 +131,78 @@ namespace WindowsFormsApp1
                         label4.Text = "Дата выгрузки JSON: " + DateTime.Parse(protoline.Split(' ')[0]).ToString("dd.MM.yyyy");
                         if (protoline.Contains("json"))
                         {
-                            menu.Add(sr.ReadLine());
+                            string test_line = sr.ReadLine();
+                            if (test_line == String.Empty)
+                                menu.Add(sr.ReadLine());
+                            else
+                                menu.Add(test_line);
                         }
-                        save_json += protoline + "\r\n";
+                        string data, name = String.Empty;
+                        JObject keyValuePairs = new JObject();
+                        foreach (var item in protoline.Split(new char[] { '\r','\n' },StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            
+                            data = DateTime.Now.ToString("dd_MM_yyyy_");
+                            if (item.Contains("response = "))
+                            {
+                                foreach (var item2 in item.Split(new string[] { " = " }, StringSplitOptions.None))
+                                {
+                                    if (item2.Contains("response"))
+                                    {
+                                   
+                                        string[] far = item2.Split(':');
+                                        data += far[0] + "_";
+                                        continue;
+                                    }
+                                       
+                                    
+                                    keyValuePairs = JObject.Parse(item2);
+                                    foreach(var item3 in keyValuePairs)
+                                    {
+                                        if(item3.Key == "success" && item3.Value.ToString() == "True")
+                                        {
+                                            data += "status_OK";
+                                        }
 
+                                        if (item3.Key == "records")
+
+                                        {
+
+                                            string path = $"{data}.json";
+                                            var exists = File.Exists(path);
+                                            using (var stream = File.Open(path, exists ? FileMode.Truncate : FileMode.CreateNew, FileAccess.Write))
+                                            {
+                                                var wr = new StreamWriter(stream);
+                                                var jw = new JsonTextWriter(wr)
+                                                {
+                                                    Formatting = Formatting.Indented,
+                                                };
+                                                JToken jake = item3.Value;
+                                                JsonConverter[] converters = new JsonConverter[0];
+                                                jake.WriteTo(jw, converters);
+                                                wr.Flush();
+                                            }
+
+
+                                        }
+                                        else
+                                            data += "";
+
+
+                                    }
+                                }
+                            }
+                            else if (item.Contains("status"))
+                            {
+
+                            }
+                            else
+                                save_json += item + ":";
+                            
+
+
+                        }
+                        save_json += "\n\r";
                     }
                     
                 }
@@ -544,6 +619,18 @@ namespace WindowsFormsApp1
         {
             //  myBool = true;
             //  decide = false;
+        }
+        public static string UnicodeToUTF8(string from)
+        {
+            var bytes = Encoding.UTF8.GetBytes(from);
+            return new string(bytes.Select(b => (char)b).ToArray());
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            listBox1.Items.Clear();
+            dataGridView1.Rows.Clear();
+            parse_XML();
         }
     }
 }
